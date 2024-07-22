@@ -1,8 +1,11 @@
 import React, { useState, ChangeEvent, useEffect, useCallback } from 'react'
 import type { ActionFunctionArgs, MetaFunction, LoaderFunction } from "@remix-run/node";
-import { Form, useActionData, json, useLoaderData, redirect } from "@remix-run/react";
-import { GoogleReCaptchaProvider, useGoogleReCaptcha } from "react-google-recaptcha-v3";
+import { Form, useActionData, json, useLoaderData, redirect, useNavigation } from "@remix-run/react";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
+import toast from 'react-hot-toast';
 import { getRecaptchaScore } from '~/utils/getRecaptchaScore';
+import validate from '~/validations/donatur-tetap.server';
+import { createDonatur } from '~/data/donatur.server';
 
 export const meta: MetaFunction = () => {
   return [
@@ -24,9 +27,12 @@ export const meta: MetaFunction = () => {
 
 export const action = async ({ request }: ActionFunctionArgs) => {
     const formData = await request.formData();
-  
+
     // form validation logic here
-    //
+    const error = await validate(formData);
+    if (error) {
+      return json({ error: error });
+    }
 
     const token = formData.get("_captcha") as string;
     const key = process.env.RECAPTCHA_SECRET_KEY as string;
@@ -34,13 +40,30 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     // validate captcha util function
     const recaptchaResult = await getRecaptchaScore(token, key);
     if (recaptchaResult) {
+        try {
+            await createDonatur(`${process.env.API_URL as string}api/donaturs/registration`, {
+                "institution_name": process.env.INSTITUTION_NAME as string,
+                "name": formData.get("name"),
+                "phone": formData.get("phone"),
+                "display_name": formData.get("display_name"),
+                "bank_name": formData.get("bank_name"),
+                "bank_account_name": formData.get("bank_account_name"),
+                "nominal_commitment": formData.get("nominal_commitment"),
+                "period_commitment": formData.get("period_commitment"),
+                "reminder_at_dayname": formData.get("reminder_at_dayname"),
+                "reminder_at_date": formData.get("reminder_at_date")
+            })
+        } catch (e) {
+            console.log(e)
+            return json({ error: "Gagal mengirim data, silahkan coba lagi" });
+        }
         // your contact form submission code here
         return redirect("/terima-kasih");
     }
   
-    return json({ message: "You are a robot!" });
+    return json({ error: "You are a robot!, silahkan refresh halaman lalu coba lagi" });
 };  
-  
+
 
 export default function DonaturTetapPage() {
     const banks = [
@@ -470,6 +493,8 @@ export default function DonaturTetapPage() {
         }
     ];
 
+    const navigation = useNavigation();
+
     // Last submission returned by the server
     const actionData = useActionData<typeof action>();
 
@@ -505,6 +530,13 @@ export default function DonaturTetapPage() {
         handleReCaptchaVerify();
     }, [handleReCaptchaVerify]);
 
+    useEffect(() => {
+        if(actionData?.error){
+         // Call your toast function here
+         toast.error(actionData.error);
+        }
+    }, [actionData])
+     
 
     return (
       <div className={`max-w-[480px] m-auto`}>
@@ -517,8 +549,8 @@ export default function DonaturTetapPage() {
             <Form method="post" className={`pt-4`}>
                 {captchaToken ? <input type="hidden" name="_captcha" value={captchaToken}></input> : null}
                 <div>
-                    <label htmlFor="fullname" className={`block mb-2 text-sm font-medium text-dark`}>Nama</label>
-                    <input defaultValue={''} type="text" name="fullname" id="fullname" required className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5`}/>
+                    <label htmlFor="name" className={`block mb-2 text-sm font-medium text-dark`}>Nama</label>
+                    <input defaultValue={''} type="text" name="name" id="name" required className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5`}/>
                 </div>
                 <div className={`mt-3`}>
                     <label htmlFor="phone" className={`block mb-2 text-sm font-medium text-dark`}>No. WA</label>
@@ -589,10 +621,8 @@ export default function DonaturTetapPage() {
                     <input type="number" name="nominal_commitment" id="nominal_commitment" defaultValue={''} required className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5`}/>
                 </div>
                 <div className={`mt-5`}>
-                    <button type="submit" className={`bg-primary w-full text-light p-2 rounded-xl`} onSubmit={() => handleReCaptchaVerify}>Submit</button>
+                    <button disabled={navigation?.formAction === '/donatur-tetap' } type="submit" className={`bg-primary w-full text-light p-2 rounded-xl disabled:opacity-60`} onSubmit={() => handleReCaptchaVerify}>Submit</button>
                 </div>
-                {actionData?.message ? <p>{actionData.message}</p> : null}
-
             </Form>
           </div>
         </div>

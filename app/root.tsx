@@ -12,6 +12,8 @@ import {
 import "./tailwind.css";
 import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import { LoaderFunction } from "@remix-run/node";
+import { Toaster } from 'react-hot-toast';
+
 
 export const loader: LoaderFunction = async () => {
   return json({
@@ -68,6 +70,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </GoogleReCaptchaProvider>
         <ScrollRestoration />
         <Scripts />
+        <Toaster position="bottom-center" toastOptions = {{
+          duration: 2000
+        }} />
       </body>
     </html>
   );
