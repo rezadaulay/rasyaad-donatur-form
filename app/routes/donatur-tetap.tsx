@@ -1,6 +1,8 @@
-import React, { useState, ChangeEvent, useEffect } from 'react'
-import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
-import { Form, useActionData, json } from "@remix-run/react";
+import React, { useState, ChangeEvent, useEffect, useCallback } from 'react'
+import type { ActionFunctionArgs, MetaFunction, LoaderFunction } from "@remix-run/node";
+import { Form, useActionData, json, useLoaderData, redirect } from "@remix-run/react";
+import { GoogleReCaptchaProvider, useGoogleReCaptcha } from "react-google-recaptcha-v3";
+import { getRecaptchaScore } from '~/utils/getRecaptchaScore';
 
 export const meta: MetaFunction = () => {
   return [
@@ -19,6 +21,25 @@ export const meta: MetaFunction = () => {
   
 //     // ...
 // }
+
+export const action = async ({ request }: ActionFunctionArgs) => {
+    const formData = await request.formData();
+  
+    // form validation logic here
+    //
+
+    const token = formData.get("_captcha") as string;
+    const key = process.env.RECAPTCHA_SECRET_KEY as string;
+  
+    // validate captcha util function
+    const recaptchaResult = await getRecaptchaScore(token, key);
+    if (recaptchaResult) {
+        // your contact form submission code here
+        return redirect("/terima-kasih");
+    }
+  
+    return json({ message: "You are a robot!" });
+};  
   
 
 export default function DonaturTetapPage() {
@@ -448,8 +469,9 @@ export default function DonaturTetapPage() {
             "code": "linkaja"
         }
     ];
+
     // Last submission returned by the server
-    // const lastResult = useActionData<typeof action>();
+    const actionData = useActionData<typeof action>();
 
     const [formData, setFormData] = useState({
         period_commitment: ""
@@ -461,7 +483,28 @@ export default function DonaturTetapPage() {
           ...formData,
           [name]: value,
         });
-    };    
+    };
+    
+    // Token state
+    const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+
+    // custom hook from reCaptcha library
+    const { executeRecaptcha } = useGoogleReCaptcha();
+
+    const handleReCaptchaVerify = useCallback(async () => {
+        if (!executeRecaptcha) {
+            return;
+        }
+
+        const token = await executeRecaptcha("yourAction");
+        setCaptchaToken(token);
+    }, [executeRecaptcha]);
+
+    // useEffect that will execute out token setting callback function
+    useEffect(() => {
+        handleReCaptchaVerify();
+    }, [handleReCaptchaVerify]);
+
 
     return (
       <div className={`max-w-[480px] m-auto`}>
@@ -471,7 +514,8 @@ export default function DonaturTetapPage() {
         <div className={`bg-light min-h-[50vh] rounded-xl shadow-sm mb-5`}>
           <div className={`p-8`}>
             <h3 className={`text-xl text-left font-semibold`}>Registrasi Donatur Tetap</h3>
-            <Form action="/donatur-tetap" className={`pt-4`}>
+            <Form method="post" className={`pt-4`}>
+                {captchaToken ? <input type="hidden" name="_captcha" value={captchaToken}></input> : null}
                 <div>
                     <label htmlFor="fullname" className={`block mb-2 text-sm font-medium text-dark`}>Nama</label>
                     <input defaultValue={''} type="text" name="fullname" id="fullname" required className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5`}/>
@@ -482,7 +526,7 @@ export default function DonaturTetapPage() {
                 </div>
                 <div className={`mt-3`}>
                     <label htmlFor="display_name" className={`block mb-2 text-sm font-medium text-dark`}>Donasi Atas Nama <small>(Opsional)</small></label>
-                    <input defaultValue={''} type="text" placeholder="Misal: Hamba Allah, Nama Orang Tua, dsb." name="display_name" id="display_name" required className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5`}/>
+                    <input defaultValue={''} type="text" placeholder="Misal: Hamba Allah, Nama Orang Tua, dsb." name="display_name" id="display_name" className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5`}/>
                 </div>
                 <div className={`mt-4`}>
                     <p className={`mb-1 text-md opacity-60 text-black`}>Informasi bank untuk konfirmasi donasi</p>
@@ -545,8 +589,9 @@ export default function DonaturTetapPage() {
                     <input type="number" name="nominal_commitment" id="nominal_commitment" defaultValue={''} required className={`bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5`}/>
                 </div>
                 <div className={`mt-5`}>
-                    <button type="submit" className={`bg-primary w-full text-light p-2 rounded-xl`}>Submit</button>
+                    <button type="submit" className={`bg-primary w-full text-light p-2 rounded-xl`} onSubmit={() => handleReCaptchaVerify}>Submit</button>
                 </div>
+                {actionData?.message ? <p>{actionData.message}</p> : null}
 
             </Form>
           </div>

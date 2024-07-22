@@ -15,10 +15,11 @@ export default function Index() {
         <img className={`max-w-full m-auto text-center`} src="https://www.rasyaad.tv/wp-content/uploads/2020/07/logo-rasyaad.png" alt="" />
         <h3 className={`text-2xl text-center font-bold`}>Donasi Rasyaad TV</h3>
       </div>
-      <div className={`bg-light min-h-[50vh] rounded-xl shadow-sm`}>
+      <div className={`bg-light py-5 rounded-xl shadow-sm`}>
         <div className={`p-5`}>
-          <div className={`pt-[40px] text-center`}>
-            <Link to="/donatur-tetap" className={`bg-primary text-light px-5 p-3 rounded-xl`}>Registrasi Donatur Tetap</Link>
+          <div className={`text-center`}>
+            <Link to="/donatur-tetap" className={`bg-primary text-light px-5 block p-3 rounded-xl`}>Registrasi Donatur Tetap</Link>
+            <a href="https://www.rasyaad.tv/laporan-donasi/" target="_blank" className={`bg-secondary mt-3 text-light px-5 block p-3 rounded-xl`}>Laporan Donasi Bulanan</a>
           </div>
         </div>
       </div>
