@@ -17,7 +17,7 @@ export const meta: MetaFunction = () => {
     },
     {
       property: "og:image",
-      content: "https://www.rasyaad.tv/wp-content/uploads/2024/07/Investasi-Yang-Tidak-Akan-Rugi.png",
+      content: "https://www.rasyaad.tv/wp-content/uploads/2024/07/Investasi-Yang-Tidak-Akan-Rugi-Investasi-Akhirat.png",
     },
     { ogDescription: 'https://donatur.rasyaad.tv'},
     { title: "Donasi Rasyaad.tv" },

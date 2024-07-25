@@ -23,7 +23,7 @@ export const meta: MetaFunction = () => {
     },
     {
       property: "og:image",
-      content: "https://www.rasyaad.tv/wp-content/uploads/2024/07/Investasi-Yang-Tidak-Akan-Rugi.png",
+      content: "https://www.rasyaad.tv/wp-content/uploads/2024/07/Investasi-Yang-Tidak-Akan-Rugi-Investasi-Akhirat.png",
     },
     { title: "Daftar Menjadi Donasi Tetap Rasyaad.tv" },
     { name: "description", content: "Barangsiapa menunjukkan kepada kebaikan, maka dia akan mendapatkan pahala seperti pahala orang yang mengerjakannya" },
