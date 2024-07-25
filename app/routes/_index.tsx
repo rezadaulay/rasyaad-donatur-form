@@ -3,6 +3,23 @@ import { Link } from "@remix-run/react";
 
 export const meta: MetaFunction = () => {
   return [
+    {
+      property: "og:type",
+      content: "Website",
+    },
+    {
+      property: "og:title",
+      content: "Donasi Rasyaad.tv",
+    },
+    {
+      property: "og:description",
+      content: "Dukung rasyaad.tv terus beroperasi dan tetap menyebarkan dakwah",
+    },
+    {
+      property: "og:image",
+      content: "https://www.rasyaad.tv/wp-content/uploads/2024/07/Investasi-Yang-Tidak-Akan-Rugi.png",
+    },
+    { ogDescription: 'https://donatur.rasyaad.tv'},
     { title: "Donasi Rasyaad.tv" },
     { name: "description", content: "Dukung rasyaad.tv terus beroperasi dan tetap menyebarkan dakwah" },
   ];

@@ -9,6 +9,22 @@ import { createDonatur } from '~/data/donatur.server';
 
 export const meta: MetaFunction = () => {
   return [
+    {
+      property: "og:type",
+      content: "Website",
+    },
+    {
+      property: "og:title",
+      content: "Daftar Menjadi Donasi Tetap Rasyaad.tv",
+    },
+    {
+      property: "og:description",
+      content: "Barangsiapa menunjukkan kepada kebaikan, maka dia akan mendapatkan pahala seperti pahala orang yang mengerjakannya",
+    },
+    {
+      property: "og:image",
+      content: "https://www.rasyaad.tv/wp-content/uploads/2024/07/Investasi-Yang-Tidak-Akan-Rugi.png",
+    },
     { title: "Daftar Menjadi Donasi Tetap Rasyaad.tv" },
     { name: "description", content: "Barangsiapa menunjukkan kepada kebaikan, maka dia akan mendapatkan pahala seperti pahala orang yang mengerjakannya" },
   ];
